@@ -1,6 +1,8 @@
 import QtQuick 2.15
 import QtQuick.Window 2.15
 import QtCharts 2.15
+import QtGraphicalEffects 1.15
+import QtDataVisualization 1.15
 Window {
     width: 500
     height: 500
@@ -9,44 +11,38 @@ Window {
     property double val_X: 0
     property double val_Y: 5
     property double idx: 1
-    property double i: 0
-    // lineSeries is a LineSeries object that has already been added to the ChartView; re-use its axes
-
-//    property var myAxisX : test.axisX(root);
-//    property var myAxisY : test.axisY(root);
-    property var scatter : test.createSeries(ChartView.SeriesTypeSpline, "line series", xAxis, yAxis);
-    property var area : test.createSeries(ChartView.SeriesTypeArea,"area series", xAxis, yAxis);
-
+    property var line : test.createSeries(ChartView.SeriesTypeSpline, "line series", xAxis, yAxis);
+    property var area : test.createSeries(ChartView.SeriesTypeArea, "area series", xAxis, yAxis);
 
     ValueAxis {
         id: xAxis
         min: 0
-        max: 10
-        tickCount: 11 // 0부터 10까지 11개의 틱
+        max: 100
+        tickCount: 11
         labelFormat: "%.0f"
+        visible: false
     }
 
     // Y 축 설정
     ValueAxis {
         id: yAxis
         min: 0
-        max: 10
-        tickCount: 11
+        max: 200
+        tickCount: 5
         labelFormat: "%.0f"
     }
 
     Item {
         Timer {
             id: myTimer
-            interval: 100 // 1000 milliseconds = 1 second
+            interval: 30 // 1000 milliseconds = 1 second
             running: true
             repeat: true // Set to true if you want the timer to repeat
             onTriggered: {
-                scatter.append(val_X, Math.random());
-//                scatter.replace(i,0,Math.random())
-                val_X = val_X + 0.1 ;
+                area.upperSeries.append(val_X, Math.random()*100);
+                area.opacity = 0.7;
+                val_X = val_X + 10 ;
                 val_Y = val_Y + idx ;
-                i++;
             }
         }
     }
@@ -54,30 +50,35 @@ Window {
     Item {
         Timer {
             id: myTimer2
-            interval: 4000 // 1000 milliseconds = 1 second
+            interval: 4000
             running: true
-            repeat: true // Set to true if you want the timer to repeat
+            repeat: true
             onTriggered: {
                 val_X = 0;
                 val_Y = 5;
                 idx=1;
-                scatter.clear();
+                area.upperSeries.clear();
             }
         }
     }
 
     ChartView {
         id:test
-//        width:300
-//        height:300
         anchors.fill: parent
+//        anchors { fill: parent; margins: -10 }
+//        margins { right: 0; bottom: 0; left: 0; top: 0 }
 //        antialiasing: true
-        theme:  ChartView.ChartThemeHighContrast
         animationOptions: ChartView.SeriesAnimations
-        animationDuration: 100
-
+        legend.visible: false
+        animationDuration: 30
+        backgroundColor:"black"
     }
-Component.onCompleted: {
-area.upperSeries = scatter;}
-
+    Gradient {
+        id: grad
+            GradientStop { position: 0.0; color: "red" }
+            GradientStop { position: 1.0; color: "green" }
+    }
+//    Component.onCompleted:{
+//        area.brush=grad;
+//    }
 }
