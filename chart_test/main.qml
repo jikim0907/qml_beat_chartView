@@ -4,14 +4,15 @@ import QtCharts 2.15
 import QtGraphicalEffects 1.15
 import QtDataVisualization 1.15
 Window {
-    width: 500
-    height: 500
+    width: 980
+    height: 720
     visible: true
     title: qsTr("Hello World")
+    property int aX: 0
     property double val_X: 0
     property double val_Y: 5
     property double idx: 1
-    property var line : test.createSeries(ChartView.SeriesTypeSpline, "line series", xAxis, yAxis);
+    property var line : test.createSeries(ChartView.SeriesTypepline, "line series", xAxis, yAxis);
     property var area : test.createSeries(ChartView.SeriesTypeArea, "area series", xAxis, yAxis);
 
     ValueAxis {
@@ -39,10 +40,11 @@ Window {
             running: true
             repeat: true // Set to true if you want the timer to repeat
             onTriggered: {
+//                line.append(val_X, Math.random()*100);
                 area.upperSeries.append(val_X, Math.random()*100);
-                area.opacity = 0.7;
-                val_X = val_X + 10 ;
+                val_X = val_X + 1 ;
                 val_Y = val_Y + idx ;
+                aX++;
             }
         }
     }
@@ -58,6 +60,7 @@ Window {
                 val_Y = 5;
                 idx=1;
                 area.upperSeries.clear();
+                line.clear();
             }
         }
     }
@@ -71,14 +74,41 @@ Window {
         animationOptions: ChartView.SeriesAnimations
         legend.visible: false
         animationDuration: 30
-        backgroundColor:"black"
+        backgroundColor:"transparent"
+    }
+
+    Canvas {
+        id: mycanvas
+        width: 500
+        height: 500
+        onPaint: {
+            var ctx = getContext("2d");
+            ctx.strokeStyle="red"
+            ctx.beginPath();
+            ctx.moveTo(aX,parent.height);
+            ctx.lineTo(aX,val_Y);
+            ctx.closePath();
+            ctx.stroke();
+        }
+    }
+
+    Rectangle{
+        id:graditem
+        gradient :Gradient {
+            id:grad
+            GradientStop { position: 0.0; color: "yellow" }
+            GradientStop { position: 0.7; color: "black" }
+        }
     }
     Gradient {
-        id: grad
-            GradientStop { position: 0.0; color: "red" }
-            GradientStop { position: 1.0; color: "green" }
-    }
-//    Component.onCompleted:{
-//        area.brush=grad;
-//    }
+        id:grad2
+        GradientStop { position: 0.0; color: "yellow" }
+        GradientStop { position: 0.7; color: "black" }
+            }
+    Component.onCompleted: {
+//        area.upperSeries=line;
+        line.color="lightblue";
+//        area.brush= grad2;
+        area.brushFilename="/mnt/hgfs/share/grad2.jpg";
+        }
 }
